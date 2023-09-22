@@ -9,8 +9,9 @@ which should be stored in a format specific to perf
 More info can be found at https://openlab-mu-internal.web.cern.ch/03_Documents/3_Technical_Documents/Technical_Reports/2011/Urs_Fassler_report.pdf
 
 ## Building
-``make BUILDDIR=<build_directory>``
+- ``mkdir build``
+- ``make``
 
 ## Running
-- Navigate to the compiled binary
+- ``cd build``
 - ``./sel4-sample-converter <path_to_samples_file>``

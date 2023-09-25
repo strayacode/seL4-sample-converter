@@ -136,7 +136,7 @@ static perf_sample_event_t receive_sel4_sample(sel4_sample_t sel4_sample) {
     return sample_event;
 }
 
-static void append_sample_event(perf_sample_event_t sample_event) {
+static void append_sample_event(perf_file_header_t *header, perf_sample_event_t sample_event) {
     perf_sample_event_node_t *sample_event_node = malloc(sizeof(perf_sample_event_node_t));
     sample_event_node->data = sample_event;
     sample_event_node->next = NULL;
@@ -152,14 +152,12 @@ static void append_sample_event(perf_sample_event_t sample_event) {
     }
 
     curr->next = sample_event_node;
+
+    // increase the size of the data section in the header
+    header->data.size += sizeof(perf_sample_event_t);
 }
 
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        printf("usage: ./seL4-sample-convert <sample_file>\n");
-        return 1;
-    }
-
+int main(void) {
     // overall flow of application
     // we will continually receive sample packets
     // the layout of the file will be like:
@@ -167,8 +165,6 @@ int main(int argc, char *argv[]) {
     // a single perf_file_attr since we only have one event source (samples)
     // sample_id_all should always be set for attr
     // 
-
-    char *sample_file = argv[1];
 
     // initialise the header with default values
     // this will be updated as we receive sel4 samples
@@ -184,6 +180,31 @@ int main(int argc, char *argv[]) {
 
         // store to memory
     // }
+
+    sel4_sample_t first_sample;
+    first_sample.ip = 0x12345678;
+    first_sample.pid = 0xDEADBEEF;
+    first_sample.time = 0;
+    first_sample.cpu = 0;
+    first_sample.period = 100;
+
+    for (int i = 0; i < CALL_STACK_DEPTH; i++) {
+        first_sample.ips[i] = i;
+    }
+
+    sel4_sample_t second_sample;
+    second_sample.ip = 0x87654321;
+    second_sample.pid = 0xCAFEBEEF;
+    second_sample.time = 2;
+    second_sample.cpu = 3;
+    second_sample.period = 200;
+
+    for (int i = 0; i < CALL_STACK_DEPTH; i++) {
+        second_sample.ips[i] = i;
+    }
+
+    append_sample_event(&header, receive_sel4_sample(first_sample));
+    append_sample_event(&header, receive_sel4_sample(second_sample));
 
     // each packet will be stored into memory and will update header.data.size each time
     // (number of records grows)

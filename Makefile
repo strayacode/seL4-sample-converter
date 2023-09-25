@@ -1,4 +1,4 @@
-BUILDDIR ?= build
+BUILDDIR := build
 CC ?= clang
 CFLAGS := -Wall -Wextra
 CFILES := $(wildcard *.c)

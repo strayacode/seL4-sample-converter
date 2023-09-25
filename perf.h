@@ -106,13 +106,13 @@ struct perf_file_attr {
 
 typedef struct perf_file_attr perf_file_attr_t;
 
-#define PERF_RECORD_MISC_CPUMODE_MASK 0
-#define PERF_RECORD_MISC_CPUMODE_UNKNOWN 1
-#define PERF_RECORD_MISC_KERNEL 2
-#define PERF_RECORD_MISC_USER 3
-#define PERF_RECORD_MISC_HYPERVISOR 4
-#define PERF_RECORD_MISC_GUEST_KERNEL 5
-#define PERF_RECORD_MISC_GUEST_USER 6
+#define PERF_RECORD_MISC_CPUMODE_MASK 7
+#define PERF_RECORD_MISC_CPUMODE_UNKNOWN 0
+#define PERF_RECORD_MISC_KERNEL 1
+#define PERF_RECORD_MISC_USER 2
+#define PERF_RECORD_MISC_HYPERVISOR 3
+#define PERF_RECORD_MISC_GUEST_KERNEL 4
+#define PERF_RECORD_MISC_GUEST_USER 5
 
 #define PERF_RECORD_MISC_EXACT_IP (1 << 14)
 #define PERF_RECORD_MISC_EXT_RESERVED (1 << 15)
@@ -199,5 +199,12 @@ enum perf_event_sample_type {
     PERF_SAMPLE_STREAM_ID = 1 << 9,
     PERF_SAMPLE_RAW = 1 << 10,
 };
+
+struct perf_sample_event {
+    perf_event_header_t header;
+    perf_sample_t sample;
+};
+
+typedef struct perf_sample_event perf_sample_event_t;
 
 #endif

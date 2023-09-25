@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include "types.h"
 #include "perf.h"
@@ -8,6 +9,15 @@
 #define SAMPLE_FREQ 100
 
 static u64 next_perf_sample_id = 0;
+
+struct perf_sample_event_node {
+    perf_sample_event_t data;
+    struct perf_sample_event_node *next;
+};
+
+typedef struct perf_sample_event_node perf_sample_event_node_t;
+
+static perf_sample_event_node_t *head = NULL;
 
 static u64 generate_perf_sample_id(void) {
     u64 id = next_perf_sample_id;
@@ -110,14 +120,38 @@ static perf_file_attr_t create_attr(void) {
     return file_attr;
 }
 
-static void receive_sel4_sample(sel4_sample_t sel4_sample) {
-    // each sample requires a new record to be created
-    perf_event_header_t event_header;
+static perf_sample_event_t receive_sel4_sample(sel4_sample_t sel4_sample) {
+    // each sample requires a new data record to be created
+    perf_sample_event_t sample_event;
 
     // for now we only handle sample event types
-    event_header.type = PERF_RECORD_SAMPLE;
+    sample_event.header.type = PERF_RECORD_SAMPLE;
 
-    perf_sample_t perf_sample = convert_to_perf_sample(sel4_sample);
+    // not exactly sure what misc type we should use here
+    sample_event.header.misc = PERF_RECORD_MISC_USER;
+
+    sample_event.header.size = sizeof(perf_sample_event_t);
+
+    sample_event.sample = convert_to_perf_sample(sel4_sample);
+    return sample_event;
+}
+
+static void append_sample_event(perf_sample_event_t sample_event) {
+    perf_sample_event_node_t *sample_event_node = malloc(sizeof(perf_sample_event_node_t));
+    sample_event_node->data = sample_event;
+    sample_event_node->next = NULL;
+
+    if (head == NULL) {
+        head = sample_event_node;
+        return;
+    }
+
+    perf_sample_event_node_t *curr = head;
+    while (curr->next != NULL) {
+        curr = curr->next;
+    }
+
+    curr->next = sample_event_node;
 }
 
 int main(int argc, char *argv[]) {
@@ -146,7 +180,9 @@ int main(int argc, char *argv[]) {
     // mainloop for receiving sel4 sample packets will go here
     // e.g.
     // while (can_receive_packets) {
-    //     receive_sel4_sample(sample);
+        // perf_sample_event_t sample_event = receive_sel4_sample(sample);
+
+        // store to memory
     // }
 
     // each packet will be stored into memory and will update header.data.size each time
@@ -157,6 +193,16 @@ int main(int argc, char *argv[]) {
     FILE* perf_data_file = fopen("build/perf.data", "w");
 
     fwrite(&header, sizeof(perf_file_header_t), 1, perf_data_file);
+    fwrite(&file_attr, sizeof(perf_file_attr_t), 1, perf_data_file);
+
+    // write each sample event to the file one by one
+    perf_sample_event_node_t *curr = head;
+    while (curr != NULL) {
+        perf_sample_event_node_t *temp = curr;
+        fwrite(&curr->data, sizeof(perf_sample_event_t), 1, perf_data_file);
+        curr = curr->next;
+        free(temp);
+    }
 
     fclose(perf_data_file);
     return 0;

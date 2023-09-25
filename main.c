@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include "types.h"
 #include "perf.h"
 #include "sample.h"
 
-static u64 next_perf_sample_id = 0;
+#define SAMPLE_FREQ 100
 
-// this will be updated as we receive sel4 samples
-static perf_file_header_t header;
+static u64 next_perf_sample_id = 0;
 
 static u64 generate_perf_sample_id(void) {
     u64 id = next_perf_sample_id;
@@ -45,7 +45,9 @@ static perf_sample_t convert_to_perf_sample(sel4_sample_t sel4_sample) {
     return perf_sample;
 }
 
-static void header_init(void) {
+static perf_file_header_t create_header(void) {
+    perf_file_header_t header;
+
     // currently we are using perf file format v1
     memcpy(&header.magic, "PERFFILE", 8);
 
@@ -76,9 +78,45 @@ static void header_init(void) {
     header.features1 = 0;
     header.features2 = 0;
     header.features3 = 0;
+    return header;
+}
+
+static perf_file_attr_t create_attr(void) {
+    perf_file_attr_t file_attr;
+
+    // not sure what type should be set to
+    file_attr.attr.type = 0;
+
+    file_attr.attr.size = sizeof(perf_event_attr_t);
+
+    // the sampling frequency used by the sel4 profiler should be set here
+    // for now we will use an arbitrary value
+    file_attr.attr.sample_freq = SAMPLE_FREQ;
+
+    // set the sample type to include all the sample information we need
+    file_attr.attr.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_TID |
+        PERF_SAMPLE_TIME | PERF_SAMPLE_ADDR |
+        PERF_SAMPLE_READ | PERF_SAMPLE_CALLCHAIN |
+        PERF_SAMPLE_ID | PERF_SAMPLE_CPU |
+        PERF_SAMPLE_PERIOD | PERF_SAMPLE_STREAM_ID |
+        PERF_SAMPLE_RAW;
+
+    file_attr.attr.freq = true;
+    file_attr.attr.sample_id_all = true;
+
+    // our single attribute won't have any ids, so initialise to 0
+    file_attr.ids.offset = 0;
+    file_attr.ids.size = 0;
+    return file_attr;
 }
 
 static void receive_sel4_sample(sel4_sample_t sel4_sample) {
+    // each sample requires a new record to be created
+    perf_event_header_t event_header;
+
+    // for now we only handle sample event types
+    event_header.type = PERF_RECORD_SAMPLE;
+
     perf_sample_t perf_sample = convert_to_perf_sample(sel4_sample);
 }
 
@@ -99,7 +137,11 @@ int main(int argc, char *argv[]) {
     char *sample_file = argv[1];
 
     // initialise the header with default values
-    header_init();
+    // this will be updated as we receive sel4 samples
+    perf_file_header_t header = create_header();
+
+    // create a single perf_file_attr
+    perf_file_attr_t file_attr = create_attr();
 
     // mainloop for receiving sel4 sample packets will go here
     // e.g.
@@ -107,7 +149,8 @@ int main(int argc, char *argv[]) {
     //     receive_sel4_sample(sample);
     // }
 
-    // each packet will be stored into memory and will update file section offsets/sizes as well
+    // each packet will be stored into memory and will update header.data.size each time
+    // (number of records grows)
 
     // when we stop receiving packets, we will write
     // the header, attribute and data section to a file

@@ -123,6 +123,8 @@ struct perf_event_header {
     u16 size; // size of the record (including the header)
 };
 
+typedef struct perf_event_header perf_event_header_t;
+
 enum perf_event_type {
     PERF_RECORD_MMAP = 0,
     PERF_RECORD_COMM = 1,
@@ -183,5 +185,19 @@ struct perf_sample {
 };
 
 typedef struct perf_sample perf_sample_t;
+
+enum perf_event_sample_type {
+    PERF_SAMPLE_IP = 1 << 0,
+    PERF_SAMPLE_TID = 1 << 1,
+    PERF_SAMPLE_TIME = 1 << 2,
+    PERF_SAMPLE_ADDR = 1 << 3,
+    PERF_SAMPLE_READ = 1 << 4,
+    PERF_SAMPLE_CALLCHAIN = 1 << 5,
+    PERF_SAMPLE_ID = 1 << 6,
+    PERF_SAMPLE_CPU = 1 << 7,
+    PERF_SAMPLE_PERIOD = 1 << 8,
+    PERF_SAMPLE_STREAM_ID = 1 << 9,
+    PERF_SAMPLE_RAW = 1 << 10,
+};
 
 #endif

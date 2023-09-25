@@ -4,9 +4,7 @@ CFLAGS := -Wall -Wextra
 CFILES := $(wildcard *.c)
 OFILES := $(patsubst %.c,$(BUILDDIR)/%.o,$(CFILES))
 
-$(info $(CFILES))
-$(info $(OFILES))
-
+$(info building...)
 $(shell mkdir -p $(BUILDDIR))
 
 seL4-sample-converter: $(OFILES)

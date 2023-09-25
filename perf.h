@@ -22,6 +22,12 @@ struct perf_file_header {
     perf_file_section_t attrs; // list of perf_file_attr entries
     perf_file_section_t data;
     perf_file_section_t event_types; // list of perf_trace_event_type entries. apparently ignored
+
+    // this part of the header seems to be unused
+    u64 features0;
+    u64 features1;
+    u64 features2;
+    u64 features3;
 };
 
 typedef struct perf_file_header perf_file_header_t;

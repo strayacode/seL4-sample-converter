@@ -208,6 +208,8 @@ int main(void) {
     append_sample_event(&header, receive_sel4_sample(first_sample));
     append_sample_event(&header, receive_sel4_sample(second_sample));
 
+    header.event_types.offset = header.data.offset + header.data.size;
+
     // each packet will be stored into memory and will update header.data.size each time
     // (number of records grows)
 
@@ -217,6 +219,10 @@ int main(void) {
 
     fwrite(&header, sizeof(perf_file_header_t), 1, perf_data_file);
     fwrite(&file_attr, sizeof(perf_file_attr_t), 1, perf_data_file);
+
+    printf("header size %ld\n", header.size);
+
+    printf("data offset size %ld %ld\n", header.data.offset, header.data.size);
 
     // write each sample event to the file one by one
     perf_sample_event_node_t *curr = head;

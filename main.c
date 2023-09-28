@@ -111,6 +111,8 @@ static perf_file_attr_t create_attr(void) {
         PERF_SAMPLE_PERIOD | PERF_SAMPLE_STREAM_ID |
         PERF_SAMPLE_RAW;
 
+    file_attr.attr.read_format = PERF_FORMAT_TOTAL_TIME_ENABLED | PERF_FORMAT_TOTAL_TIME_RUNNING | PERF_FORMAT_ID;
+
     file_attr.attr.freq = true;
     file_attr.attr.sample_id_all = true;
 

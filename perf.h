@@ -50,7 +50,7 @@ struct perf_event_attr {
     };
 
     u64 sample_type; // gives information about what is stored in the sampling record
-    u64 read_format;
+    u64 read_format; // PERF_FORMAT_TOTAL_TIME_ENABLED | PERF_FORMAT_TOTAL_TIME_RUNNING | PERF_FORMAT_ID
     u64 disabled : 1, // off by default
         inherit : 1, // children inherit it
         pinned : 1, // must always be on pmu
@@ -206,5 +206,14 @@ struct perf_sample_event {
 };
 
 typedef struct perf_sample_event perf_sample_event_t;
+
+enum perf_event_read_format {
+    PERF_FORMAT_TOTAL_TIME_ENABLED		= 1U << 0,
+    PERF_FORMAT_TOTAL_TIME_RUNNING		= 1U << 1,
+    PERF_FORMAT_ID = 1U << 2,
+    PERF_FORMAT_GROUP			= 1U << 3,
+    PERF_FORMAT_LOST			= 1U << 4,
+    PERF_FORMAT_MAX = 1U << 5,		/* non-ABI */
+};
 
 #endif

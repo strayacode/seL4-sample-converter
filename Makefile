@@ -1,6 +1,6 @@
 BUILDDIR := build
 CC ?= clang
-CFLAGS := -Wall -Wextra
+CFLAGS := -Wall -Wextra -g
 CFILES := $(wildcard *.c)
 OFILES := $(patsubst %.c,$(BUILDDIR)/%.o,$(CFILES))
 

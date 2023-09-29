@@ -3,4 +3,4 @@
 make
 ./build/seL4-sample-converter
 cd build/
-perf report -v perf.data
+perf report -v -D -I --header perf.data

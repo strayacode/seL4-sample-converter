@@ -58,6 +58,8 @@ static perf_sample_t convert_to_perf_sample(sel4_sample_t sel4_sample) {
 static perf_file_header_t create_header(void) {
     perf_file_header_t header;
 
+    memset(&header, 0, sizeof(perf_file_header_t));
+
     // currently we are using perf file format v1
     memcpy(&header.magic, "PERFFILE", 8);
 
@@ -93,6 +95,8 @@ static perf_file_header_t create_header(void) {
 
 static perf_file_attr_t create_attr(void) {
     perf_file_attr_t file_attr;
+
+    memset(&file_attr, 0, sizeof(perf_file_attr_t));
 
     // not sure what type should be set to
     file_attr.attr.type = 0;
@@ -134,6 +138,8 @@ static perf_sample_event_t receive_sel4_sample(sel4_sample_t sel4_sample) {
 
     sample_event.header.size = sizeof(perf_sample_event_t);
 
+    printf("event header size %d %ld\n", sample_event.header.size, sizeof(perf_event_header_t));
+
     sample_event.sample = convert_to_perf_sample(sel4_sample);
     return sample_event;
 }
@@ -142,6 +148,10 @@ static void append_sample_event(perf_file_header_t *header, perf_sample_event_t 
     perf_sample_event_node_t *sample_event_node = malloc(sizeof(perf_sample_event_node_t));
     sample_event_node->data = sample_event;
     sample_event_node->next = NULL;
+
+    // // increase the size of the data section in the header
+    header->data.size += sizeof(perf_sample_event_t);
+    // printf("size is now %ld\n", header->data.size);
 
     if (head == NULL) {
         head = sample_event_node;
@@ -154,9 +164,6 @@ static void append_sample_event(perf_file_header_t *header, perf_sample_event_t 
     }
 
     curr->next = sample_event_node;
-
-    // increase the size of the data section in the header
-    header->data.size += sizeof(perf_sample_event_t);
 }
 
 int main(void) {
@@ -178,9 +185,9 @@ int main(void) {
     // mainloop for receiving sel4 sample packets will go here
     // e.g.
     // while (can_receive_packets) {
-        // perf_sample_event_t sample_event = receive_sel4_sample(sample);
+    //     perf_sample_event_t sample_event = receive_sel4_sample(sample);
 
-        // store to memory
+    //     store to memory
     // }
 
     sel4_sample_t first_sample;
@@ -206,16 +213,20 @@ int main(void) {
     }
 
     append_sample_event(&header, receive_sel4_sample(first_sample));
-    append_sample_event(&header, receive_sel4_sample(second_sample));
+    // append_sample_event(&header, receive_sel4_sample(second_sample));
 
     header.event_types.offset = header.data.offset + header.data.size;
 
+
+    printf("done\n");
     // each packet will be stored into memory and will update header.data.size each time
     // (number of records grows)
 
     // when we stop receiving packets, we will write
     // the header, attribute and data section to a file
     FILE* perf_data_file = fopen("build/perf.data", "w");
+
+    printf("pointers %p %p\n", &header, &file_attr);
 
     fwrite(&header, sizeof(perf_file_header_t), 1, perf_data_file);
     fwrite(&file_attr, sizeof(perf_file_attr_t), 1, perf_data_file);
@@ -228,7 +239,9 @@ int main(void) {
     perf_sample_event_node_t *curr = head;
     while (curr != NULL) {
         perf_sample_event_node_t *temp = curr;
+        printf("write perf sample event %p size %ld\n", temp, sizeof(curr->data));
         fwrite(&curr->data, sizeof(perf_sample_event_t), 1, perf_data_file);
+        printf("curr->next %p %p\n", curr->next, &curr->data);
         curr = curr->next;
         free(temp);
     }

@@ -1,15 +1,11 @@
 use std::mem;
 
-use bytemuck::{
-    Pod, Zeroable,
-};
-
 use super::{file_section::FileSection, header_flags::HeaderFlags};
 
 const PERF_MAGIC: u64 = 0x32454c4946524550;
 
 #[repr(C)]
-#[derive(Default, Pod, Clone, Copy, Zeroable)]
+#[derive(Default, Clone, Copy)]
 pub struct Header {
     // must be PERFFILE2 in little endian format
     pub magic: u64,

@@ -1,4 +1,4 @@
-use super::file_section::FileSection;
+use super::{file_section::FileSection, header_flags::HeaderFlags};
 
 const PERF_MAGIC_NUMBER: u64 = 0x32454c4946524550;
 
@@ -22,7 +22,8 @@ pub struct Header {
     // TODO: figure out what this section represents
     event_types: FileSection,
 
-    // TODO: figure out flags
-    flags: u64,
+    // flags are used to extend the perf file with extra info
+    // in our case only the first 64-bit variable is used
+    flags: HeaderFlags,
     flags1: [u64; 3],
 }

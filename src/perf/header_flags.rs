@@ -1,6 +1,9 @@
 use bitflags::bitflags;
+use bytemuck::{Zeroable, Pod};
 
 bitflags! {
+    #[repr(C)]
+    #[derive(Default, Clone, Copy, Pod, Zeroable)]
     pub struct HeaderFlags: u64 {
         const RESERVED = 0;
         const FIRST_FEATURE = 1 << 0;

@@ -5,75 +5,82 @@ use super::file_section::FileSection;
 use bitflags::bitflags;
 
 #[repr(C, packed)]
+#[derive(Default)]
 pub struct FileAttribute {
-    attr: EventAttribute,
+    pub attr: EventAttribute,
 
     // points to a file section which contains an array of u64 ids
     // i assume these ids are for the events which are linked to this attribute
-    ids: FileSection,
+    pub ids: FileSection,
 }
 
 #[repr(C, packed)]
-struct EventAttribute {
+#[derive(Default)]
+pub struct EventAttribute {
     // major type: hardware/software/tracepoint/etc
-    event_type: EventType,
+    pub event_type: EventType,
 
     // size of the attribute
-    size: u32,
+    pub size: u32,
 
     // TODO: figure out what this is for
-    config: u64,
+    pub config: u64,
 
-    sample_period_or_freq: u64,
-    sample_type: SampleType,
-    read_format: ReadFormat,
-    attr_flags: AttributeFlags,
+    pub sample_period_or_freq: u64,
+    pub sample_type: SampleType,
+    pub read_format: ReadFormat,
+    pub attr_flags: AttributeFlags,
 
     // wakeup every n events of bytes before wakeup
-    wakeup_events_or_watermark : u32,
+    pub wakeup_events_or_watermark : u32,
 
-    bp_type: u32,
-    bp_addr_or_config1: u64,
-    bp_len_or_config2: u64,
+    pub bp_type: u32,
+    pub bp_addr_or_config1: u64,
+    pub bp_len_or_config2: u64,
 
     // doesn't seem to be useful
-    branch_sample_type: u64,
+    pub branch_sample_type: u64,
 
     // defines set of user regs to dump on samples
-    sample_regs_user: u64,
+    pub sample_regs_user: u64,
 
     // defines size of the user stack to dump on sampes
-    sample_stack_user: u32,
+    pub sample_stack_user: u32,
 
-    clockid: i32,
+    pub clockid: i32,
 
     // defines set of regs to dump for each sample
     // precise = 0: pmu interrupt
     // precise > 0: sampled instruction
-    sample_regs_intr: u64,
+    pub sample_regs_intr: u64,
 
     // wakeup watermark for aux area
-    aux_watermark: u32,
+    pub aux_watermark: u32,
 
-    sample_max_stack: u16,
-    reserved2: u16,
-    aux_sample_size: u32,
-    reserved3: u32,
-    sig_data: u64,
+    pub sample_max_stack: u16,
+    pub reserved2: u16,
+    pub aux_sample_size: u32,
+    pub reserved3: u32,
+    pub sig_data: u64,
 
     // extension of config2
-    config3: u64,
-
+    pub config3: u64,
 }
 
 #[repr(u32)]
-enum EventType {
+pub enum EventType {
     Hardware = 0,
     Software = 1,
     Tracepoint = 2,
     HwCache = 3,
     Raw = 4,
     Breakpoint = 5,
+}
+
+impl Default for EventType {
+    fn default() -> Self {
+        EventType::Hardware
+    }
 }
 
 bitflags! {

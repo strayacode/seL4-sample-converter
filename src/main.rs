@@ -20,5 +20,7 @@ fn main() -> std::io::Result<()> {
     println!("event types section: {}", header.event_types);
     println!("flags: {:#016x}", header.flags);
 
+    file.write_all(bytes)?;
+
     Ok(())
 }

@@ -5,3 +5,8 @@ be used to visualise them with ``perf report``
 
 ``perf report`` expects a file called ``perf.data`` or similar,
 which should be stored in a format specific to perf
+
+# Running:
+- ``cargo run``
+- this will produce a ``perf.data`` file
+- ``perf report -D -I -v --header perf.data``

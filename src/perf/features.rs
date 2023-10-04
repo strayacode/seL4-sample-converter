@@ -1,9 +1,11 @@
+// this file outlines structures related to the features section of the file
+
 use bitflags::bitflags;
 
 bitflags! {
     #[repr(C)]
-    #[derive(Default, Clone, Copy)]
-    pub struct HeaderFlags: u64 {
+    #[derive(Default)]
+    pub struct FeatureFlags: u64 {
         const RESERVED = 0;
         const FIRST_FEATURE = 1 << 0;
         const TRACING_DATA = 1 << 0;
@@ -39,4 +41,10 @@ bitflags! {
         const PMU_CAPS = 1 << 30;
         const LAST_FEATURE = 1 << 31;
     }
+}
+
+#[repr(C, packed)]
+struct HeaderString<const N: usize> {
+    length: u32,
+    string: [char; N],
 }

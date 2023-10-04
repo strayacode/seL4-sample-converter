@@ -1,11 +1,11 @@
 use std::mem;
 
-use super::{file_section::FileSection, header_flags::HeaderFlags};
+use super::{file_section::FileSection, features::FeatureFlags};
 
 const PERF_MAGIC: u64 = 0x32454c4946524550;
 
 #[repr(C)]
-#[derive(Default, Clone, Copy)]
+#[derive(Default)]
 pub struct Header {
     // must be PERFFILE2 in little endian format
     pub magic: u64,
@@ -28,7 +28,7 @@ pub struct Header {
 
     // flags are used to extend the perf file with extra info
     // in our case only the first 64-bit variable is used
-    pub flags: HeaderFlags,
+    pub flags: FeatureFlags,
     pub flags1: [u64; 3],
 }
 

@@ -1,24 +1,24 @@
-use std::{fs::File, mem, io::Write, slice};
+use std::{fs::File, mem, io::Write, slice, str};
 
-use crate::perf::header::Header;
-
-pub mod perf;
-
-fn as_raw_bytes<T>(data: &T) -> &[u8] {
-    let ptr = data as *const T;
-    let size = mem::size_of::<T>();
-    let bytes = unsafe { slice::from_raw_parts(ptr, size) };
-    bytes
-}
+use sample_converter::{perf::header::Header, as_raw_bytes};
 
 fn main() -> std::io::Result<()> {
     let mut file = File::create("perf.data")?;
 
     let mut header = Header::new();
-    let bytes: &[u8] = bytemuck::bytes_of(&header);
+    let bytes: &[u8] = as_raw_bytes(&header);
 
-    file.write_all("hi there".as_bytes()).unwrap();
-    println!("Hello, world!");
+    let magic_bytes = header.magic.to_le_bytes();
+    let magic_string = str::from_utf8(&magic_bytes).unwrap();
+    assert_eq!(magic_string, "PERFILE2");
+
+    println!("magic: {}", magic_string);
+    println!("header size: {}", header.size);
+    println!("size of a single attribute: {}", header.attr_size);
+    println!("attribute section: {}", header.attrs);
+    println!("data section: {}", header.data);
+    println!("event types section: {}", header.event_types);
+    println!("flags: {:#016x}", header.flags);
 
     Ok(())
 }

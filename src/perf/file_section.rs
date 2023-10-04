@@ -1,3 +1,5 @@
+use std::fmt;
+
 use bytemuck::{Pod, Zeroable};
 
 #[repr(C)]
@@ -8,4 +10,10 @@ pub struct FileSection {
 
     // the size of the section
     size: u64,
+}
+
+impl fmt::Display for FileSection {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({:#016x}, {:#016x})", self.offset, self.offset + self.size)
+    }
 }

@@ -1,6 +1,6 @@
 use std::mem;
 
-use super::{file_section::FileSection, features::FeatureFlags};
+use super::{file_section::FileSection, features::FeatureFlags, attributes::FileAttribute};
 
 const PERF_MAGIC: u64 = 0x32454c4946524550;
 
@@ -35,9 +35,21 @@ pub struct Header {
 impl Header {
     // creates a header with default fields
     pub fn new() -> Header {
+        let size = mem::size_of::<Header>() as u64;
+        let attr_size = mem::size_of::<FileAttribute>() as u64;
+        
         Header {
             magic: PERF_MAGIC,
-            size: mem::size_of::<Header>() as u64,
+            size,
+            attr_size,
+
+            // the attribute section occurs right after the header
+            attrs: FileSection::new(size, attr_size),
+
+            // the data section occurs right after the attribute section
+            // but we don't have any attributes yet so just initialise
+            // the size to 0
+            data: FileSection::new(size + attr_size, 0),
             ..Default::default()
         }
     }

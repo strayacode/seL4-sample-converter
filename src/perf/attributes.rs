@@ -5,7 +5,7 @@ use super::file_section::FileSection;
 use bitflags::bitflags;
 
 #[repr(C, packed)]
-struct FileAttribute {
+pub struct FileAttribute {
     attr: EventAttribute,
 
     // points to a file section which contains an array of u64 ids

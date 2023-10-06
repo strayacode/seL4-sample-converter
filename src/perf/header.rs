@@ -5,7 +5,7 @@ use super::{file_section::FileSection, features::FeatureFlags, attributes::FileA
 const PERF_MAGIC: u64 = 0x32454c4946524550;
 
 #[repr(C)]
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Header {
     // must be PERFFILE2 in little endian format
     pub magic: u64,

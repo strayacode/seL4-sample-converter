@@ -4,8 +4,8 @@ use super::file_section::FileSection;
 
 use bitflags::bitflags;
 
-#[repr(C, packed)]
-#[derive(Default)]
+#[repr(C)]
+#[derive(Default, Debug)]
 pub struct FileAttribute {
     pub attr: EventAttribute,
 
@@ -14,8 +14,8 @@ pub struct FileAttribute {
     pub ids: FileSection,
 }
 
-#[repr(C, packed)]
-#[derive(Default)]
+#[repr(C)]
+#[derive(Default, Debug)]
 pub struct EventAttribute {
     // major type: hardware/software/tracepoint/etc
     pub event_type: EventType,
@@ -59,15 +59,10 @@ pub struct EventAttribute {
 
     pub sample_max_stack: u16,
     pub reserved2: u16,
-    pub aux_sample_size: u32,
-    pub reserved3: u32,
-    pub sig_data: u64,
-
-    // extension of config2
-    pub config3: u64,
 }
 
 #[repr(u32)]
+#[derive(Debug)]
 pub enum EventType {
     Hardware = 0,
     Software = 1,
@@ -85,7 +80,7 @@ impl Default for EventType {
 
 bitflags! {
     #[repr(C)]
-    #[derive(Default)]
+    #[derive(Default, Debug)]
     pub struct SampleType: u64 {
         const IP = 1 << 0;
         const TID = 1 << 1;
@@ -118,7 +113,7 @@ bitflags! {
 
 bitflags! {
     #[repr(C)]
-    #[derive(Default)]
+    #[derive(Default, Debug)]
     pub struct ReadFormat: u64 {
         const TOTAL_TIME_ENABLED = 1 << 0;
         const TOTAL_TIME_RUNNING = 1 << 1;
@@ -130,7 +125,7 @@ bitflags! {
 
 bitflags! {
     #[repr(C)]
-    #[derive(Default)]
+    #[derive(Default, Debug)]
     pub struct AttributeFlags : u64 {
         const DISABLED = 1 << 0; // off by default
         const INHERIT = 1 << 1; // children inherit it

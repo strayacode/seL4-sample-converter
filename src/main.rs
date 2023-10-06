@@ -1,34 +1,32 @@
-use std::{fs::File, mem, io::Write, slice, str};
+use std::fs::File;
 
-use sample_converter::{perf::{header::Header, attributes::{FileAttribute, EventAttribute}, PerfFile}, as_raw_bytes};
+use sample_converter::{perf::PerfFile, sample::Sel4Sample};
 
 fn main() -> std::io::Result<()> {
-    let mut perf_file = PerfFile::new("perf.data")?;
+    let mut file = File::create("perf.data")?;
+    let mut perf_file = PerfFile::new()?;
     
-    let mut header = Header::new();
-    
-    let magic_bytes = header.magic.to_le_bytes();
-    let magic_string = str::from_utf8(&magic_bytes).unwrap();
-    assert_eq!(magic_string, "PERFILE2");
+    // add some test samples
+    let sample1 = Sel4Sample {
+        ip: 0x12345678,
+        pid: 0xdeadbeef,
+        timestamp: 0,
+        cpu: 0,
+        period: 100,
+    };
 
-    println!("magic: {}", magic_string);
-    println!("header size: {}", header.size);
-    println!("size of a single attribute: {}", header.attr_size);
-    println!("attribute section: {}", header.attrs);
-    println!("data section: {}", header.data);
-    println!("event types section: {}", header.event_types);
-    println!("flags: {:#016x}", header.flags);
+    let sample2 = Sel4Sample {
+        ip: 0x87654321,
+        pid: 0xcafebeef,
+        timestamp: 2,
+        cpu: 3,
+        period: 200,
+    };
 
-    perf_file.write(&header)?;
-
-    let mut file_attr = FileAttribute::default();
-    file_attr.attr.size = mem::size_of::<EventAttribute>() as u32;
-
-    // arbitrary sample frequency value
-    file_attr.attr.sample_period_or_freq = 100;
-
-    // include all sample information
-    // file_attr.attr.sample_type = 
+    perf_file.add_sel4_sample(sample1);
+    perf_file.add_sel4_sample(sample2);
+    perf_file.print_summary();
+    perf_file.dump_to_file(&mut file)?;
 
     Ok(())
 }

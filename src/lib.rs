@@ -1,4 +1,5 @@
 pub mod perf;
+pub mod sample;
 
 use std::{mem, slice};
 
@@ -14,7 +15,7 @@ mod tests {
     use crate::as_raw_bytes;
     use super::*;
 
-    #[repr(C, packed)]
+    #[repr(C)]
     struct TestStruct {
         a: u8,
         b: u32,

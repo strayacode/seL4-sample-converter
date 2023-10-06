@@ -4,7 +4,7 @@ use bitflags::bitflags;
 
 bitflags! {
     #[repr(C)]
-    #[derive(Default)]
+    #[derive(Default, Debug)]
     pub struct FeatureFlags: u64 {
         const RESERVED = 0;
         const FIRST_FEATURE = 1 << 0;
@@ -43,7 +43,7 @@ bitflags! {
     }
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 struct HeaderString<const N: usize> {
     length: u32,
     string: [char; N],

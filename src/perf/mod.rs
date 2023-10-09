@@ -1,6 +1,6 @@
 use std::{fs::File, io::Write, path::Path, str, mem};
 
-use crate::{as_raw_bytes, sample::Sel4Sample, perf::attributes::{AttributeFlags, EventAttribute}};
+use crate::{as_raw_bytes, sample::Sel4Sample, perf::attributes::{AttributeFlags, EventAttribute, SampleType}};
 
 use self::{events::SampleEvent, header::Header, attributes::FileAttribute};
 
@@ -28,12 +28,12 @@ impl PerfFile {
         attribute.attr.size = mem::size_of::<EventAttribute>() as u32;
 
         // arbitrary sample frequency value
-        attribute.attr.sample_period_or_freq = 100;
+        attribute.attr.sample_period_or_freq = 4000;
 
         // include all sample information
-        // attribute.attr.sample_type = 
+        attribute.attr.sample_type = SampleType::IP | SampleType::TID | SampleType::TIME | SampleType::ADDR | SampleType::PERIOD;
 
-        attribute.attr.attr_flags = AttributeFlags::FREQ | AttributeFlags::SAMPLE_ID_ALL;
+        attribute.attr.attr_flags = AttributeFlags::DISABLED | AttributeFlags::INHERIT | AttributeFlags::FREQ | AttributeFlags::SAMPLE_ID_ALL;
 
         Ok(PerfFile {
             header,

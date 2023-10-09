@@ -9,18 +9,18 @@ fn main() -> std::io::Result<()> {
     // add some test samples
     let sample1 = Sel4Sample {
         ip: 0x12345678,
-        pid: 0xdeadbeef,
+        pid: 3,
         timestamp: 0,
         cpu: 0,
-        period: 100,
+        period: 600,
     };
 
-    let sample2 = Sel4Sample {
+    let sample2: Sel4Sample = Sel4Sample {
         ip: 0x87654321,
-        pid: 0xcafebeef,
+        pid: 2,
         timestamp: 2,
         cpu: 3,
-        period: 200,
+        period: 1000,
     };
 
     perf_file.add_sel4_sample(sample1);

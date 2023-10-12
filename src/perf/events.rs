@@ -87,7 +87,7 @@ impl SampleEvent {
     pub fn from(sample: Sel4Sample) -> Self {
         let header = EventHeader {
             event_type: EventType::Sample,
-            misc: Misc::CPUMODE_USER,
+            misc: Misc::CPUMODE_GUEST_USER,
             size: mem::size_of::<SampleEvent>() as u16,
         };
 
@@ -101,4 +101,10 @@ impl SampleEvent {
             period: sample.period,
         }
     }
+}
+
+#[repr(C)]
+#[derive(Debug)]
+struct CommEvent {
+    
 }

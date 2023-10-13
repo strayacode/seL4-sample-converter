@@ -14,7 +14,8 @@ pub mod events;
 pub struct PerfFile {
     header: Header,
     attribute: FileAttribute,
-    samples: Vec<SampleEvent>,
+    comm_events: Vec<CommEvent>,
+    sample_events: Vec<SampleEvent>,
 }
 
 impl PerfFile {
@@ -43,7 +44,8 @@ impl PerfFile {
         Ok(PerfFile {
             header,
             attribute,
-            samples: Vec::new(),
+            comm_events: Vec::new(),
+            sample_events: Vec::new(),
         })
     }
 
@@ -55,13 +57,15 @@ impl PerfFile {
     pub fn create_comm_event(&mut self, pid: u32, application: String) {
         // each time we add a comm event the data section size must be increased
         let comm_event = CommEvent::new(pid, application);
+        self.header.data.size += mem::size_of::<CommEvent>() as u64;
+        self.comm_events.push(comm_event);
     }
 
     pub fn create_sample_event(&mut self, sample: Sel4Sample) {
         // each time we add a sample event the data section size must be increased
         let sample_event = SampleEvent::new(sample);
         self.header.data.size += mem::size_of::<SampleEvent>() as u64;
-        self.samples.push(sample_event);
+        self.sample_events.push(sample_event);
     }
 
     pub fn print_summary(&self) {
@@ -71,8 +75,13 @@ impl PerfFile {
         println!("attributes:");
         println!("{:?}", self.attribute);
 
-        println!("samples:");
-        for sample in &self.samples {
+        println!("comm events");
+        for comm_event in &self.comm_events {
+            println!("{:?}", comm_event);
+        }
+
+        println!("sample events:");
+        for sample in &self.sample_events {
             println!("{:?}", sample);
         }
     }
@@ -81,8 +90,12 @@ impl PerfFile {
         Self::write_to_file(&self.header, file)?;
         Self::write_to_file(&self.attribute, file)?;
 
-        for sample in &self.samples {
-            Self::write_to_file(sample, file)?;
+        for comm_event in &self.comm_events {
+            Self::write_to_file(comm_event, file)?;
+        }
+
+        for sample_event in &self.sample_events {
+            Self::write_to_file(sample_event, file)?;
         }
 
         println!("profile data successfully dumped to perf.data");

@@ -1,6 +1,6 @@
-use std::fs::File;
+use std::{fs::File, path::Path};
 
-use sample_converter::{perf::PerfFile, sample::Sel4Sample, sample_parser};
+use sample_converter::{perf::PerfFile, sample_parser};
 
 fn main() -> std::io::Result<()> {
     let mut file = File::create("perf.data")?;
@@ -8,6 +8,13 @@ fn main() -> std::io::Result<()> {
 
     // add samples from samples file
     let samples_file = sample_parser::parse_samples("samples/a.json")?;
+
+    println!("{:?}", samples_file);
+
+    for (application, pid) in samples_file.pd_mappings {
+        // let application = Path::new(&elf).file_name().unwrap().to_str().unwrap();
+        perf_file.create_comm_event(pid, application);
+    }
 
     for sample in samples_file.samples {
         perf_file.create_sample_event(sample);

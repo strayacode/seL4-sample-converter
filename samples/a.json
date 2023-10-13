@@ -1,4 +1,11 @@
 {
+    "pd_mappings": {
+        "a.elf": 0,
+        "b.elf": 1,
+        "c.elf": 4,
+        "d.elf": 7,
+        "e.elf": 10
+    },
     "samples": [
         {
             "ip": 3405695742,

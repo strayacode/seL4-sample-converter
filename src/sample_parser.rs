@@ -1,4 +1,4 @@
-use std::{fs, io, path::Path};
+use std::{fs, io, path::Path, collections::HashMap};
 
 use serde::{Serialize, Deserialize};
 
@@ -6,6 +6,7 @@ use crate::sample::Sel4Sample;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SamplesFile {
+    pub pd_mappings: HashMap<String, u32>,
     pub samples: Vec<Sel4Sample>,
 }
 

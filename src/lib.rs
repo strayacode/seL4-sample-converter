@@ -1,5 +1,6 @@
 pub mod perf;
 pub mod sample;
+pub mod sample_parser;
 
 use std::{mem, slice};
 

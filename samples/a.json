@@ -1,0 +1,39 @@
+{
+    "samples": [
+        {
+            "ip": 3405695742,
+            "pid": 0,
+            "timestamp": 0,
+            "cpu": 0,
+            "period": 10
+        },
+        {
+            "ip": 3405695742,
+            "pid": 1,
+            "timestamp": 2,
+            "cpu": 3,
+            "period": 20
+        },
+        {
+            "ip": 3405695742,
+            "pid": 4,
+            "timestamp": 5,
+            "cpu": 6,
+            "period": 30
+        },
+        {
+            "ip": 3405695742,
+            "pid": 7,
+            "timestamp": 8,
+            "cpu": 9,
+            "period": 40
+        },
+        {
+            "ip": 3405695742,
+            "pid": 10,
+            "timestamp": 11,
+            "cpu": 12,
+            "period": 50
+        }
+    ]
+}

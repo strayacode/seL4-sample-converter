@@ -31,7 +31,7 @@ impl PerfFile {
         attribute.attr.sample_period_or_freq = 4000;
 
         // include all sample information
-        attribute.attr.sample_type = SampleType::IP | SampleType::TID | SampleType::TIME | SampleType::ADDR | SampleType::PERIOD;
+        attribute.attr.sample_type = SampleType::IP | SampleType::TID | SampleType::TIME | SampleType::CPU | SampleType::PERIOD;
 
         attribute.attr.attr_flags = AttributeFlags::DISABLED | AttributeFlags::INHERIT | AttributeFlags::FREQ | AttributeFlags::SAMPLE_ID_ALL;
 

@@ -1,6 +1,9 @@
+use serde::{Serialize, Deserialize};
+
 pub const CALL_STACK_DEPTH: usize = 10;
 
 #[repr(C)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Sel4Sample {
     // instruction pointer
     pub ip: u64,

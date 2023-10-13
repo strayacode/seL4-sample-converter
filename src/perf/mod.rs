@@ -1,8 +1,8 @@
-use std::{fs::File, io::Write, path::Path, str, mem};
+use std::{fs::File, io::Write, str, mem};
 
 use crate::{as_raw_bytes, sample::Sel4Sample, perf::attributes::{AttributeFlags, EventAttribute, SampleType}};
 
-use self::{events::SampleEvent, header::Header, attributes::FileAttribute};
+use self::{events::{SampleEvent, CommEvent}, header::Header, attributes::FileAttribute};
 
 pub mod header;
 pub mod file_section;
@@ -33,7 +33,12 @@ impl PerfFile {
         // include all sample information
         attribute.attr.sample_type = SampleType::IP | SampleType::TID | SampleType::TIME | SampleType::CPU | SampleType::PERIOD;
 
-        attribute.attr.attr_flags = AttributeFlags::DISABLED | AttributeFlags::INHERIT | AttributeFlags::FREQ | AttributeFlags::SAMPLE_ID_ALL;
+        attribute.attr.attr_flags = AttributeFlags::DISABLED
+            | AttributeFlags::INHERIT
+            | AttributeFlags::COMM
+            | AttributeFlags::FREQ
+            | AttributeFlags::SAMPLE_ID_ALL
+            | AttributeFlags::COMM_EXEC;
 
         Ok(PerfFile {
             header,
@@ -47,9 +52,14 @@ impl PerfFile {
         file.write_all(bytes)
     }
 
-    pub fn add_sel4_sample(&mut self, sample: Sel4Sample) {
+    pub fn create_comm_event(&mut self, pid: u32, application: String) {
+        // each time we add a comm event the data section size must be increased
+        let comm_event = CommEvent::new(pid, application);
+    }
+
+    pub fn create_sample_event(&mut self, sample: Sel4Sample) {
         // each time we add a sample event the data section size must be increased
-        let sample_event = SampleEvent::from(sample);
+        let sample_event = SampleEvent::new(sample);
         self.header.data.size += mem::size_of::<SampleEvent>() as u64;
         self.samples.push(sample_event);
     }

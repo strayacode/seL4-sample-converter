@@ -10,7 +10,7 @@ fn main() -> std::io::Result<()> {
     let samples_file = sample_parser::parse_samples("samples/a.json")?;
 
     for sample in samples_file.samples {
-        perf_file.add_sel4_sample(sample);
+        perf_file.create_sample_event(sample);
     }
 
     perf_file.print_summary();

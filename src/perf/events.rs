@@ -84,7 +84,7 @@ pub struct SampleEvent {
 }
 
 impl SampleEvent {
-    pub fn from(sample: Sel4Sample) -> Self {
+    pub fn new(sample: Sel4Sample) -> Self {
         let header = EventHeader {
             event_type: EventType::Sample,
             misc: Misc::CPUMODE_GUEST_USER,
@@ -105,6 +105,37 @@ impl SampleEvent {
 
 #[repr(C)]
 #[derive(Debug)]
-struct CommEvent {
-    
+pub struct CommEvent {
+    header: EventHeader,
+    pid: u32,
+    tid: u32,
+    comm: [char; 16],
+}
+
+impl CommEvent {
+    pub fn new(pid: u32, application: String) -> CommEvent {
+        let header = EventHeader {
+            event_type: EventType::Comm,
+            misc: Misc::CPUMODE_GUEST_USER,
+            size: mem::size_of::<CommEvent>() as u16,
+        };
+
+        let mut comm = ['\0'; 16];
+        let mut chars = application.chars();
+        
+        for i in 0..16 {
+            if let Some(char) = chars.next() {
+                comm[i] = char;
+            } else {
+                break;
+            }
+        }
+
+        CommEvent {
+            header,
+            pid,
+            tid: pid,
+            comm,
+        }
+    }
 }

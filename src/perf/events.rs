@@ -4,7 +4,26 @@ use bitflags::bitflags;
 
 use crate::sample::Sel4Sample;
 
-use std::mem;
+use std::{mem, io::Write};
+
+const CPUMODE_UNKNOWN: u16 = 0 << 0;
+const CPUMODE_KERNEL: u16 = 1 << 0;
+const CPUMODE_USER: u16 = 2 << 0;
+const CPUMODE_HYPERVISOR: u16 = 3 << 0;
+const CPUMODE_GUEST_KERNEL: u16 = 4 << 0;
+const CPUMODE_GUEST_USER: u16 = 5 << 0;
+const PROC_MAP_PARSE_TIMEOUT: u16 = 1 << 12;
+const MMAP_DATA: u16 = 1 << 13;
+const COMM_EXEC: u16 = 1 << 13;
+const FORK_EXEC: u16 = 1 << 13;
+const SWITCH_OUT: u16 = 1 << 13;
+const EXACT_IP: u16 = 1 << 14;
+const SWITCH_OUT_PREEMPT: u16 = 1 << 14;
+const MMAP_BUILD_ID: u16 = 1 << 14;
+const EXT_RESERVED: u16 = 1 << 15;
+
+const PATH_MAX: usize = 4096;
+const COMM_MAX: usize = 16;
 
 #[repr(C)]
 #[derive(Debug)]
@@ -12,10 +31,10 @@ pub struct EventHeader {
     event_type: EventType,
 
     // indicates some miscellaneous information
-    misc: Misc,
+    misc: u16,
 
     // the size of the record including the header
-    size: u16,
+    pub size: u16,
 }
 
 #[repr(u32)]
@@ -44,28 +63,6 @@ enum EventType {
     AuxOutputHwId = 21,
 }
 
-bitflags! {
-    #[repr(C)]
-    #[derive(Default, Debug)]
-    pub struct Misc: u16 {
-        const CPUMODE_UNKNOWN = 0 << 0;
-        const CPUMODE_KERNEL = 1 << 0;
-        const CPUMODE_USER = 2 << 0;
-        const CPUMODE_HYPERVISOR = 3 << 0;
-        const CPUMODE_GUEST_KERNEL = 4 << 0;
-        const CPUMODE_GUEST_USER = 5 << 0;
-        const PROC_MAP_PARSE_TIMEOUT = 1 << 12;
-        const MMAP_DATA = 1 << 13;
-        const COMM_EXEC = 1 << 13;
-        const FORK_EXEC = 1 << 13;
-        const SWITCH_OUT = 1 << 13;
-        const EXACT_IP = 1 << 14;
-        const SWITCH_OUT_PREEMPT = 1 << 14;
-        const MMAP_BUILD_ID = 1 << 14;
-        const EXT_RESERVED = 1 << 15;
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct SampleEvent {
@@ -87,7 +84,7 @@ impl SampleEvent {
     pub fn new(sample: Sel4Sample) -> Self {
         let header = EventHeader {
             event_type: EventType::Sample,
-            misc: Misc::CPUMODE_GUEST_USER,
+            misc: 0x4002,
             size: mem::size_of::<SampleEvent>() as u16,
         };
 
@@ -109,27 +106,20 @@ pub struct CommEvent {
     header: EventHeader,
     pid: u32,
     tid: u32,
-    comm: [char; 16],
+    comm: [u8; COMM_MAX],
 }
 
 impl CommEvent {
-    pub fn new(pid: u32, application: String) -> CommEvent {
+    pub fn new(pid: u32, application: &str) -> CommEvent {
         let header = EventHeader {
             event_type: EventType::Comm,
-            misc: Misc::CPUMODE_GUEST_USER,
+            misc: 0x4002,
             size: mem::size_of::<CommEvent>() as u16,
         };
 
-        let mut comm = ['\0'; 16];
-        let mut chars = application.chars();
-        
-        for i in 0..16 {
-            if let Some(char) = chars.next() {
-                comm[i] = char;
-            } else {
-                break;
-            }
-        }
+        let mut comm = [0; COMM_MAX];
+        fill_from_str(&mut comm, application);
+        comm[COMM_MAX - 1] = 0;
 
         CommEvent {
             header,
@@ -138,4 +128,44 @@ impl CommEvent {
             comm,
         }
     }
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct MmapEvent {
+    pub header: EventHeader,
+    pid: u32,
+    tid: u32,
+    start: u64,
+    len: u64,
+    pgoff: u64,
+    filename: [u8; PATH_MAX],
+}
+
+impl MmapEvent {
+    pub fn new(pid: u32, application: &str) -> MmapEvent {
+        let header = EventHeader {
+            event_type: EventType::Mmap2,
+            misc: 0x1000,
+            size: (mem::size_of::<MmapEvent>() - PATH_MAX + application.len() + 1) as u16,
+        };
+
+        let mut filename: [u8; PATH_MAX] = [0; PATH_MAX];
+        fill_from_str(&mut filename, application);
+        filename[PATH_MAX - 1] = 0;
+
+        MmapEvent {
+            header,
+            pid,
+            tid: pid,
+            start: 0x400000,
+            len: 8192,
+            pgoff: 0,
+            filename,
+        }
+    }
+}
+
+fn fill_from_str(mut bytes: &mut [u8], s: &str) {
+    bytes.write(s.as_bytes()).unwrap();
 }

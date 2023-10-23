@@ -1,10 +1,10 @@
 {
     "pd_mappings": {
-        "a.elf": 0,
-        "b.elf": 1,
-        "c.elf": 4,
-        "d.elf": 7,
-        "e.elf": 10
+        "/home/straya/comp3901/seL4-sample-converter/a.elf": 0,
+        "/home/straya/comp3901/seL4-sample-converter/b.elf": 1,
+        "/home/straya/comp3901/seL4-sample-converter/c.elf": 4,
+        "/home/straya/comp3901/seL4-sample-converter/d.elf": 7,
+        "/home/straya/comp3901/seL4-sample-converter/e.elf": 10
     },
     "samples": [
         {

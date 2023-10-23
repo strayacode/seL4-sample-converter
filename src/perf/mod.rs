@@ -2,7 +2,7 @@ use std::{fs::File, io::Write, str, mem};
 
 use crate::{as_raw_bytes, sample::Sel4Sample, perf::attributes::{AttributeFlags, EventAttribute, SampleType}};
 
-use self::{events::{SampleEvent, CommEvent}, header::Header, attributes::FileAttribute};
+use self::{events::{SampleEvent, CommEvent, MmapEvent}, header::Header, attributes::FileAttribute};
 
 pub mod header;
 pub mod file_section;
@@ -16,6 +16,7 @@ pub struct PerfFile {
     attribute: FileAttribute,
     comm_events: Vec<CommEvent>,
     sample_events: Vec<SampleEvent>,
+    mmap_events: Vec<MmapEvent>,
 }
 
 impl PerfFile {
@@ -46,18 +47,20 @@ impl PerfFile {
             attribute,
             comm_events: Vec::new(),
             sample_events: Vec::new(),
+            mmap_events: Vec::new(),
         })
     }
 
-    fn write_to_file<T>(data: &T, file: &mut File) -> std::io::Result<()> {
-        let bytes = as_raw_bytes(data);
+    fn write_to_file<T>(data: &T, file: &mut File, bytes_to_write: usize) -> std::io::Result<()> {
+        let bytes = &as_raw_bytes(data)[0..bytes_to_write];
         file.write_all(bytes)
     }
 
-    pub fn create_comm_event(&mut self, pid: u32, application: String) {
+    pub fn create_comm_event(&mut self, pid: u32, application: &str) {
         // each time we add a comm event the data section size must be increased
         let comm_event = CommEvent::new(pid, application);
         self.header.data.size += mem::size_of::<CommEvent>() as u64;
+        println!("create comm event of size {} data section size is now {}", mem::size_of::<CommEvent>(), self.header.data.size);
         self.comm_events.push(comm_event);
     }
 
@@ -65,7 +68,16 @@ impl PerfFile {
         // each time we add a sample event the data section size must be increased
         let sample_event = SampleEvent::new(sample);
         self.header.data.size += mem::size_of::<SampleEvent>() as u64;
+        println!("create sample event of size {} data section size is now {}", mem::size_of::<SampleEvent>(), self.header.data.size);
         self.sample_events.push(sample_event);
+    }
+
+    pub fn create_mmap_event(&mut self, pid: u32, application: &str) {
+        // each time we add a mmap event the data section size must be increased
+        let mmap_event = MmapEvent::new(pid, application);
+        self.header.data.size += mmap_event.header.size as u64;
+        println!("create mmap event of size {} data section size is now {}", mmap_event.header.size, self.header.data.size);
+        self.mmap_events.push(mmap_event);
     }
 
     pub fn print_summary(&self) {
@@ -80,6 +92,11 @@ impl PerfFile {
             println!("{:?}", comm_event);
         }
 
+        println!("mmap events");
+        for mmap_event in &self.mmap_events {
+            println!("{:?}", mmap_event);
+        }
+
         println!("sample events:");
         for sample in &self.sample_events {
             println!("{:?}", sample);
@@ -87,15 +104,19 @@ impl PerfFile {
     }
 
     pub fn dump_to_file(&mut self, file: &mut File) -> std::io::Result<()> {
-        Self::write_to_file(&self.header, file)?;
-        Self::write_to_file(&self.attribute, file)?;
+        Self::write_to_file(&self.header, file, mem::size_of::<Header>())?;
+        Self::write_to_file(&self.attribute, file, mem::size_of::<FileAttribute>())?;
 
         for comm_event in &self.comm_events {
-            Self::write_to_file(comm_event, file)?;
+            Self::write_to_file(comm_event, file, mem::size_of::<CommEvent>())?;
+        }
+
+        for mmap_event in &self.mmap_events {
+            Self::write_to_file(mmap_event, file, mmap_event.header.size as usize)?;
         }
 
         for sample_event in &self.sample_events {
-            Self::write_to_file(sample_event, file)?;
+            Self::write_to_file(sample_event, file, mem::size_of::<SampleEvent>())?;
         }
 
         println!("profile data successfully dumped to perf.data");

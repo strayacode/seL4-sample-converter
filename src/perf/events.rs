@@ -23,7 +23,7 @@ const MMAP_BUILD_ID: u16 = 1 << 14;
 const EXT_RESERVED: u16 = 1 << 15;
 
 const PATH_MAX: usize = 4096;
-const COMM_MAX: usize = 16;
+const COMM_MAX: usize = 32;
 
 fn align_up(address: usize, size: usize) -> usize {
     let mask = size - 1;
@@ -89,7 +89,7 @@ impl SampleEvent {
     pub fn new(sample: Sel4Sample) -> Self {
         let header = EventHeader {
             event_type: EventType::Sample,
-            misc: 0x4002,
+            misc: CPUMODE_USER,
             size: mem::size_of::<SampleEvent>() as u16,
         };
 
@@ -153,7 +153,7 @@ impl MmapEvent {
         println!("application size {} {}", application_size, application);
         let header = EventHeader {
             event_type: EventType::Mmap,
-            misc: MMAP_DATA,
+            misc: 0,
             size: (mem::size_of::<MmapEvent>() - PATH_MAX + application_size) as u16,
         };
 

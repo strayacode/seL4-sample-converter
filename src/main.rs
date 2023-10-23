@@ -1,4 +1,4 @@
-use std::fs::File;
+use std::{fs::File, path::Path};
 
 use sample_converter::{perf::PerfFile, sample_parser};
 
@@ -12,7 +12,8 @@ fn main() -> std::io::Result<()> {
     println!("{:?}", samples_file);
 
     for (application, pid) in samples_file.pd_mappings {
-        perf_file.create_comm_event(pid, &application);
+        let filename = Path::new(&application).file_name().unwrap().to_str().unwrap();
+        perf_file.create_comm_event(pid, filename);
         perf_file.create_mmap_event(pid, &application);
     }
 

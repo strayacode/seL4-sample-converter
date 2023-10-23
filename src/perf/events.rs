@@ -25,6 +25,11 @@ const EXT_RESERVED: u16 = 1 << 15;
 const PATH_MAX: usize = 4096;
 const COMM_MAX: usize = 16;
 
+fn align_up(address: usize, size: usize) -> usize {
+    let mask = size - 1;
+    (address + mask) & !mask
+}
+
 #[repr(C)]
 #[derive(Debug)]
 pub struct EventHeader {
@@ -144,10 +149,12 @@ pub struct MmapEvent {
 
 impl MmapEvent {
     pub fn new(pid: u32, application: &str) -> MmapEvent {
+        let application_size = align_up(application.len() + 1, 8);
+        println!("application size {} {}", application_size, application);
         let header = EventHeader {
-            event_type: EventType::Mmap2,
-            misc: 0x1000,
-            size: (mem::size_of::<MmapEvent>() - PATH_MAX + application.len() + 1) as u16,
+            event_type: EventType::Mmap,
+            misc: MMAP_DATA,
+            size: (mem::size_of::<MmapEvent>() - PATH_MAX + application_size) as u16,
         };
 
         let mut filename: [u8; PATH_MAX] = [0; PATH_MAX];

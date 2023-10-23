@@ -37,6 +37,7 @@ impl PerfFile {
 
         attribute.attr.attr_flags = AttributeFlags::DISABLED
             | AttributeFlags::INHERIT
+            | AttributeFlags::MMAP
             | AttributeFlags::COMM
             | AttributeFlags::FREQ
             | AttributeFlags::SAMPLE_ID_ALL

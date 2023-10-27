@@ -2,7 +2,7 @@
 
 use crate::sample::Sel4Sample;
 
-use std::{mem, io::Write, fmt};
+use std::{mem, io::Write, fmt, ffi::CStr};
 
 const CPUMODE_UNKNOWN: u16 = 0 << 0;
 const CPUMODE_KERNEL: u16 = 1 << 0;
@@ -150,6 +150,22 @@ impl CommEvent {
     }
 }
 
+impl fmt::Display for CommEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "CommEvent:")?;
+        writeln!(f, " EventHeader:")?;
+        writeln!(f, "  event_type: {:?}", self.header.event_type)?;
+        writeln!(f, "  misc: {:#06x}", self.header.misc)?;
+        writeln!(f, "  size: {}", self.header.size)?;
+        writeln!(f, " pid: {}", self.pid)?;
+        writeln!(f, " tid: {}", self.tid)?;
+        
+        let cstr = CStr::from_bytes_until_nul(&self.comm).expect("invalid cstr");
+        writeln!(f, " comm: {}", cstr.to_str().unwrap())?;
+        Ok(())
+    }
+}
+
 #[repr(C)]
 #[derive(Debug)]
 pub struct MmapEvent {
@@ -184,6 +200,25 @@ impl MmapEvent {
             pgoff: 4096,
             filename,
         }
+    }
+}
+
+impl fmt::Display for MmapEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "MmapEvent:")?;
+        writeln!(f, " EventHeader:")?;
+        writeln!(f, "  event_type: {:?}", self.header.event_type)?;
+        writeln!(f, "  misc: {:#06x}", self.header.misc)?;
+        writeln!(f, "  size: {}", self.header.size)?;
+        writeln!(f, " pid: {}", self.pid)?;
+        writeln!(f, " tid: {}", self.tid)?;
+        writeln!(f, " start: {:#018x}", self.start)?;
+        writeln!(f, " len: {:#018x}", self.len)?;
+        writeln!(f, " pgoff: {:#018x}", self.pgoff)?;
+        
+        let cstr = CStr::from_bytes_until_nul(&self.filename).expect("invalid cstr");
+        writeln!(f, " filename: {}", cstr.to_str().unwrap())?;
+        Ok(())
     }
 }
 

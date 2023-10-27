@@ -9,8 +9,6 @@ fn main() -> std::io::Result<()> {
     // add samples from samples file
     let samples_file = sample_parser::parse_samples("samples/symbolstuff.json")?;
 
-    println!("{:?}", samples_file);
-
     for (application, pid) in samples_file.pd_mappings {
         let filename = Path::new(&application).file_name().unwrap().to_str().unwrap();
         perf_file.create_comm_event(pid, filename);

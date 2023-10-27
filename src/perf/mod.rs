@@ -82,14 +82,12 @@ impl PerfFile {
         println!("{}", self.header);
         println!("{}", self.attribute);
 
-        println!("comm events");
         for comm_event in &self.comm_events {
-            println!("{:?}", comm_event);
+            println!("{}", comm_event);
         }
 
-        println!("mmap events");
         for mmap_event in &self.mmap_events {
-            println!("{:?}", mmap_event);
+            println!("{}", mmap_event);
         }
 
         for sample in &self.sample_events {
@@ -113,7 +111,7 @@ impl PerfFile {
             Self::write_to_file(sample_event, file, mem::size_of::<SampleEvent>())?;
         }
 
-        println!("profile data successfully dumped to perf.data");
+        println!("profile data dumped to perf.data");
         Ok(())
     }
 }

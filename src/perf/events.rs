@@ -2,7 +2,7 @@
 
 use crate::sample::Sel4Sample;
 
-use std::{mem, io::Write};
+use std::{mem, io::Write, fmt};
 
 const CPUMODE_UNKNOWN: u16 = 0 << 0;
 const CPUMODE_KERNEL: u16 = 1 << 0;
@@ -31,10 +31,10 @@ fn align_up(address: usize, size: usize) -> usize {
 #[repr(C)]
 #[derive(Debug)]
 pub struct EventHeader {
-    event_type: EventType,
+    pub event_type: EventType,
 
     // indicates some miscellaneous information
-    misc: u16,
+    pub misc: u16,
 
     // the size of the record including the header
     pub size: u16,
@@ -42,7 +42,7 @@ pub struct EventHeader {
 
 #[repr(u32)]
 #[derive(Debug)]
-enum EventType {
+pub enum EventType {
     Mmap = 1,
     Lost = 2,
     Comm = 3,
@@ -75,12 +75,12 @@ pub struct SampleEvent {
     // PERF_SAMPLE_IDENTIFIER, etc to optionally allow
     // fields in the sample
     // this means we can just support a basic amount of sample info
-    ip: u64,
-    pid: u32,
-    tid: u32,
-    time: u64,
-    cpu: u32,
-    period: u64,
+    pub ip: u64,
+    pub pid: u32,
+    pub tid: u32,
+    pub time: u64,
+    pub cpu: u32,
+    pub period: u64,
 }
 
 impl SampleEvent {
@@ -100,6 +100,23 @@ impl SampleEvent {
             cpu: sample.cpu,
             period: sample.period,
         }
+    }
+}
+
+impl fmt::Display for SampleEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "SampleEvent:")?;
+        writeln!(f, " EventHeader:")?;
+        writeln!(f, "  event_type: {:?}", self.header.event_type)?;
+        writeln!(f, "  misc: {:#06x}", self.header.misc)?;
+        writeln!(f, "  size: {}", self.header.size)?;
+        writeln!(f, " ip: {:#018x}", self.ip)?;
+        writeln!(f, " pid: {}", self.pid)?;
+        writeln!(f, " tid: {}", self.tid)?;
+        writeln!(f, " time: {}", self.time)?;
+        writeln!(f, " cpu: {}", self.cpu)?;
+        writeln!(f, " period: {}", self.period)?;
+        Ok(())
     }
 }
 

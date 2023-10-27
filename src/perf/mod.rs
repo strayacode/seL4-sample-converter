@@ -80,9 +80,7 @@ impl PerfFile {
 
     pub fn print_summary(&self) {
         println!("{}", self.header);
-
-        println!("Attributes:");
-        println!(" {}", self.attribute);
+        println!("{}", self.attribute);
 
         println!("comm events");
         for comm_event in &self.comm_events {
@@ -94,9 +92,8 @@ impl PerfFile {
             println!("{:?}", mmap_event);
         }
 
-        println!("sample events:");
         for sample in &self.sample_events {
-            println!("{:?}", sample);
+            println!("{}", sample);
         }
     }
 

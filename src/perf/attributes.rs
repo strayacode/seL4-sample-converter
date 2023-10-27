@@ -18,7 +18,10 @@ pub struct FileAttribute {
 
 impl fmt::Display for FileAttribute {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "FileAttribute:")
+        writeln!(f, "FileAttribute:")?;
+        writeln!(f, " EventAttribute:")?;
+        writeln!(f, " ids: {}", self.ids)?;
+        Ok(())
     }
 }
 

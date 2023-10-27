@@ -1,3 +1,4 @@
+use core::fmt;
 use std::mem;
 
 use super::{file_section::FileSection, features::FeatureFlags, attributes::FileAttribute};
@@ -23,7 +24,7 @@ pub struct Header {
     // the data section contains multiple events
     pub data: FileSection,
 
-    // TODO: figure out what this section represents
+    // this section doesn't seem necessary for our usecase
     pub event_types: FileSection,
 
     // flags are used to extend the perf file with extra info
@@ -50,7 +51,23 @@ impl Header {
             // but we don't have any attributes yet so just initialise
             // the size to 0
             data: FileSection::new(size + attr_size, 0),
+            flags: FeatureFlags::NONE,
             ..Default::default()
         }
+    }
+}
+
+impl fmt::Display for Header {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Header:")?;
+        writeln!(f, "  magic: {:#018x}", self.magic)?;
+        writeln!(f, "  size: {}", self.size)?;
+        writeln!(f, "  attribute size: {}", self.attr_size)?;
+        writeln!(f, "  attribute section: {}", self.attrs)?;
+        writeln!(f, "  data section: {}", self.data)?;
+        writeln!(f, "  event types section: {}", self.event_types)?;
+        writeln!(f, "  feature flags: {:?}", self.flags)?;
+
+        Ok(())
     }
 }

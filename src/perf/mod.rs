@@ -61,7 +61,6 @@ impl PerfFile {
         // each time we add a comm event the data section size must be increased
         let comm_event = CommEvent::new(pid, application);
         self.header.data.size += mem::size_of::<CommEvent>() as u64;
-        println!("create comm event of size {} data section size is now {}", mem::size_of::<CommEvent>(), self.header.data.size);
         self.comm_events.push(comm_event);
     }
 
@@ -69,7 +68,6 @@ impl PerfFile {
         // each time we add a sample event the data section size must be increased
         let sample_event = SampleEvent::new(sample);
         self.header.data.size += mem::size_of::<SampleEvent>() as u64;
-        println!("create sample event of size {} data section size is now {}", mem::size_of::<SampleEvent>(), self.header.data.size);
         self.sample_events.push(sample_event);
     }
 
@@ -77,14 +75,12 @@ impl PerfFile {
         // each time we add a mmap event the data section size must be increased
         let mmap_event = MmapEvent::new(pid, application);
         self.header.data.size += mmap_event.header.size as u64;
-        println!("create mmap event of size {} data section size is now {}", mmap_event.header.size, self.header.data.size);
         self.mmap_events.push(mmap_event);
     }
 
     pub fn print_summary(&self) {
-        println!("header:");
-        println!("{:?}", self.header);
-
+        println!("{}", self.header);
+        
         println!("attributes:");
         println!("{:?}", self.attribute);
 

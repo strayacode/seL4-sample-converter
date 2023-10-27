@@ -7,7 +7,7 @@ fn main() -> std::io::Result<()> {
     let mut perf_file = PerfFile::new()?;
 
     // add samples from samples file
-    let samples_file = sample_parser::parse_samples("samples/a.json")?;
+    let samples_file = sample_parser::parse_samples("samples/symbolstuff.json")?;
 
     println!("{:?}", samples_file);
 

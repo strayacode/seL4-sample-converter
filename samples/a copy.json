@@ -1,6 +1,6 @@
 {
     "pd_mappings": {
-        "/home/straya/comp3901/seL4-sample-converter/a.elf": 0,
+        "/home/straya/dev/perf_testing/program": 0,
         "/home/straya/comp3901/seL4-sample-converter/b.elf": 1,
         "/home/straya/comp3901/seL4-sample-converter/c.elf": 4,
         "/home/straya/comp3901/seL4-sample-converter/d.elf": 7,
@@ -8,11 +8,11 @@
     },
     "samples": [
         {
-            "ip": 4198400,
+            "ip": 94073166520749,
             "pid": 0,
             "timestamp": 0,
             "cpu": 0,
-            "period": 10
+            "period": 300
         },
         {
             "ip": 4198400,

@@ -1,8 +1,8 @@
 use std::{fs::File, io::Write, str, mem};
 
-use crate::{as_raw_bytes, sample::Sel4Sample, perf::attributes::{AttributeFlags, EventAttribute, SampleType}};
+use crate::{as_raw_bytes, sample::Sel4Sample, perf::{attributes::{AttributeFlags, EventAttribute, SampleType}, events::MmapEvent}};
 
-use self::{events::{SampleEvent, CommEvent, MmapEvent}, header::Header, attributes::FileAttribute};
+use self::{events::{SampleEvent, CommEvent}, header::Header, attributes::FileAttribute};
 
 pub mod header;
 pub mod file_section;

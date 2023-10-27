@@ -25,6 +25,10 @@ const EXT_RESERVED: u16 = 1 << 15;
 const PATH_MAX: usize = 4096;
 const COMM_MAX: usize = 32;
 
+const PROT_READ: u32 = 1 << 0;
+const PROT_WRITE: u32 = 1 << 1;
+const PROT_EXEC: u32 = 1 << 2;
+
 fn align_up(address: usize, size: usize) -> usize {
     let mask = size - 1;
     (address + mask) & !mask
@@ -144,6 +148,12 @@ pub struct MmapEvent {
     start: u64,
     len: u64,
     pgoff: u64,
+    // maj: u32,
+    // min: u32,
+    // ino: u64,
+    // ino_generation: u64,
+    // prot: u32,
+    // flags: u32,
     filename: [u8; PATH_MAX],
 }
 
@@ -153,8 +163,8 @@ impl MmapEvent {
         println!("application size {} {}", application_size, application);
         let header = EventHeader {
             event_type: EventType::Mmap,
-            misc: 0,
-            size: (mem::size_of::<MmapEvent>() - PATH_MAX + application_size) as u16,
+            misc: CPUMODE_USER,
+            size: ((mem::size_of::<MmapEvent>() - PATH_MAX + application_size) + 0x10) as u16,
         };
 
         let mut filename: [u8; PATH_MAX] = [0; PATH_MAX];
@@ -165,9 +175,21 @@ impl MmapEvent {
             header,
             pid,
             tid: pid,
-            start: 0x400000,
-            len: 8192,
-            pgoff: 0,
+            start: 0x558f1dac6000,
+            len: 4096,
+            pgoff: 4096,
+
+            // // figure out what to set these to
+            // maj: 259,
+            // min: 2,
+            // ino: 8525076,
+            // ino_generation: 1113011823,
+
+            // prot: PROT_READ | PROT_EXEC,
+
+            // // figure out what to set this to
+            // flags: 0,
+
             filename,
         }
     }

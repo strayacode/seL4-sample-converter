@@ -60,14 +60,13 @@ impl Header {
 impl fmt::Display for Header {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Header:")?;
-        writeln!(f, "  magic: {:#018x}", self.magic)?;
-        writeln!(f, "  size: {}", self.size)?;
-        writeln!(f, "  attribute size: {}", self.attr_size)?;
-        writeln!(f, "  attribute section: {}", self.attrs)?;
-        writeln!(f, "  data section: {}", self.data)?;
-        writeln!(f, "  event types section: {}", self.event_types)?;
-        writeln!(f, "  feature flags: {:?}", self.flags)?;
-
+        writeln!(f, " magic: {:#018x}", self.magic)?;
+        writeln!(f, " size: {}", self.size)?;
+        writeln!(f, " attribute size: {}", self.attr_size)?;
+        writeln!(f, " attribute section: {}", self.attrs)?;
+        writeln!(f, " data section: {}", self.data)?;
+        writeln!(f, " event types section: {}", self.event_types)?;
+        writeln!(f, " feature flags: {:?}", self.flags)?;
         Ok(())
     }
 }

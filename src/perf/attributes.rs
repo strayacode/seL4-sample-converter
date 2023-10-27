@@ -1,5 +1,7 @@
 // this file outlines structures related to the attributes section of the file
 
+use std::fmt;
+
 use super::file_section::FileSection;
 
 use bitflags::bitflags;
@@ -12,6 +14,12 @@ pub struct FileAttribute {
     // points to a file section which contains an array of u64 ids
     // i assume these ids are for the events which are linked to this attribute
     pub ids: FileSection,
+}
+
+impl fmt::Display for FileAttribute {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "FileAttribute:")
+    }
 }
 
 #[repr(C)]

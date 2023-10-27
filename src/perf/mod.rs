@@ -80,9 +80,9 @@ impl PerfFile {
 
     pub fn print_summary(&self) {
         println!("{}", self.header);
-        
-        println!("attributes:");
-        println!("{:?}", self.attribute);
+
+        println!("Attributes:");
+        println!(" {}", self.attribute);
 
         println!("comm events");
         for comm_event in &self.comm_events {

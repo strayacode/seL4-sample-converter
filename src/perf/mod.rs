@@ -1,8 +1,8 @@
-use std::{fs::File, io::Write, path::Path, str, mem};
+use std::{fs::File, io::Write, str, mem};
 
-use crate::{as_raw_bytes, sample::Sel4Sample, perf::attributes::{AttributeFlags, EventAttribute, SampleType}};
+use crate::{as_raw_bytes, sample::Sel4Sample, perf::{attributes::{AttributeFlags, EventAttribute, SampleType}, events::MmapEvent}};
 
-use self::{events::SampleEvent, header::Header, attributes::FileAttribute};
+use self::{events::{SampleEvent, CommEvent}, header::Header, attributes::FileAttribute};
 
 pub mod header;
 pub mod file_section;
@@ -14,7 +14,9 @@ pub mod events;
 pub struct PerfFile {
     header: Header,
     attribute: FileAttribute,
-    samples: Vec<SampleEvent>,
+    comm_events: Vec<CommEvent>,
+    sample_events: Vec<SampleEvent>,
+    mmap_events: Vec<MmapEvent>,
 }
 
 impl PerfFile {
@@ -31,51 +33,85 @@ impl PerfFile {
         attribute.attr.sample_period_or_freq = 4000;
 
         // include all sample information
-        attribute.attr.sample_type = SampleType::IP | SampleType::TID | SampleType::TIME | SampleType::ADDR | SampleType::PERIOD;
+        attribute.attr.sample_type = SampleType::IP | SampleType::TID | SampleType::TIME | SampleType::CPU | SampleType::PERIOD;
 
-        attribute.attr.attr_flags = AttributeFlags::DISABLED | AttributeFlags::INHERIT | AttributeFlags::FREQ | AttributeFlags::SAMPLE_ID_ALL;
+        attribute.attr.attr_flags = AttributeFlags::DISABLED
+            | AttributeFlags::INHERIT
+            | AttributeFlags::MMAP
+            | AttributeFlags::COMM
+            | AttributeFlags::FREQ
+            | AttributeFlags::SAMPLE_ID_ALL
+            | AttributeFlags::COMM_EXEC;
 
         Ok(PerfFile {
             header,
             attribute,
-            samples: Vec::new(),
+            comm_events: Vec::new(),
+            sample_events: Vec::new(),
+            mmap_events: Vec::new(),
         })
     }
 
-    fn write_to_file<T>(data: &T, file: &mut File) -> std::io::Result<()> {
-        let bytes = as_raw_bytes(data);
+    fn write_to_file<T>(data: &T, file: &mut File, bytes_to_write: usize) -> std::io::Result<()> {
+        let bytes = &as_raw_bytes(data)[0..bytes_to_write];
         file.write_all(bytes)
     }
 
-    pub fn add_sel4_sample(&mut self, sample: Sel4Sample) {
+    pub fn create_comm_event(&mut self, pid: u32, application: &str) {
+        // each time we add a comm event the data section size must be increased
+        let comm_event = CommEvent::new(pid, application);
+        self.header.data.size += mem::size_of::<CommEvent>() as u64;
+        self.comm_events.push(comm_event);
+    }
+
+    pub fn create_sample_event(&mut self, sample: Sel4Sample) {
         // each time we add a sample event the data section size must be increased
-        let sample_event = SampleEvent::from(sample);
+        let sample_event = SampleEvent::new(sample);
         self.header.data.size += mem::size_of::<SampleEvent>() as u64;
-        self.samples.push(sample_event);
+        self.sample_events.push(sample_event);
+    }
+
+    pub fn create_mmap_event(&mut self, pid: u32, application: &str) {
+        // each time we add a mmap event the data section size must be increased
+        let mmap_event = MmapEvent::new(pid, application);
+        self.header.data.size += mmap_event.header.size as u64;
+        self.mmap_events.push(mmap_event);
     }
 
     pub fn print_summary(&self) {
-        println!("header:");
-        println!("{:?}", self.header);
+        println!("{}", self.header);
+        println!("{}", self.attribute);
 
-        println!("attributes:");
-        println!("{:?}", self.attribute);
+        for comm_event in &self.comm_events {
+            println!("{}", comm_event);
+        }
 
-        println!("samples:");
-        for sample in &self.samples {
-            println!("{:?}", sample);
+        for mmap_event in &self.mmap_events {
+            println!("{}", mmap_event);
+        }
+
+        for sample in &self.sample_events {
+            println!("{}", sample);
         }
     }
 
     pub fn dump_to_file(&mut self, file: &mut File) -> std::io::Result<()> {
-        Self::write_to_file(&self.header, file)?;
-        Self::write_to_file(&self.attribute, file)?;
+        Self::write_to_file(&self.header, file, mem::size_of::<Header>())?;
+        Self::write_to_file(&self.attribute, file, mem::size_of::<FileAttribute>())?;
 
-        for sample in &self.samples {
-            Self::write_to_file(sample, file)?;
+        for comm_event in &self.comm_events {
+            Self::write_to_file(comm_event, file, mem::size_of::<CommEvent>())?;
         }
 
-        println!("profile data successfully dumped to perf.data");
+        for mmap_event in &self.mmap_events {
+            Self::write_to_file(mmap_event, file, mmap_event.header.size as usize)?;
+        }
+
+        for sample_event in &self.sample_events {
+            Self::write_to_file(sample_event, file, mem::size_of::<SampleEvent>())?;
+        }
+
+        println!("profile data dumped to perf.data");
         Ok(())
     }
 }

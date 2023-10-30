@@ -6,7 +6,6 @@ bitflags! {
     #[repr(C)]
     #[derive(Default, Debug)]
     pub struct FeatureFlags: u64 {
-        const RESERVED = 0;
         const FIRST_FEATURE = 1 << 0;
         const TRACING_DATA = 1 << 0;
         const BUILD_ID = 1 << 1;
@@ -40,11 +39,6 @@ bitflags! {
         const HYBRID_TOPOLOGY = 1 << 29;
         const PMU_CAPS = 1 << 30;
         const LAST_FEATURE = 1 << 31;
+        const NONE = 1 << 32;
     }
-}
-
-#[repr(C)]
-struct HeaderString<const N: usize> {
-    length: u32,
-    string: [char; N],
 }

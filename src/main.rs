@@ -1,30 +1,24 @@
-use std::fs::File;
+use std::{fs::File, path::Path};
 
-use sample_converter::{perf::PerfFile, sample::Sel4Sample};
+use sample_converter::{perf::PerfFile, sample_parser};
 
 fn main() -> std::io::Result<()> {
     let mut file = File::create("perf.data")?;
     let mut perf_file = PerfFile::new()?;
-    
-    // add some test samples
-    let sample1 = Sel4Sample {
-        ip: 0x12345678,
-        pid: 3,
-        timestamp: 0,
-        cpu: 0,
-        period: 600,
-    };
 
-    let sample2: Sel4Sample = Sel4Sample {
-        ip: 0x87654321,
-        pid: 2,
-        timestamp: 2,
-        cpu: 3,
-        period: 1000,
-    };
+    // add samples from samples file
+    let samples_file = sample_parser::parse_samples("samples/symbolstuff.json")?;
 
-    perf_file.add_sel4_sample(sample1);
-    perf_file.add_sel4_sample(sample2);
+    for (application, pid) in samples_file.pd_mappings {
+        let filename = Path::new(&application).file_name().unwrap().to_str().unwrap();
+        perf_file.create_comm_event(pid, filename);
+        perf_file.create_mmap_event(pid, &application);
+    }
+
+    for sample in samples_file.samples {
+        perf_file.create_sample_event(sample);
+    }
+
     perf_file.print_summary();
     perf_file.dump_to_file(&mut file)?;
 

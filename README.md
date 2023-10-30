@@ -8,5 +8,7 @@ which should be stored in a format specific to perf
 
 # Running:
 - ``cargo run``
+- eventually a ``samples.json`` file should be provided for the samples,
+and a path to the directory should be provided so that the program can access the sel4 system file
 - this will produce a ``perf.data`` file
 - ``perf report -D -I -v --header perf.data``

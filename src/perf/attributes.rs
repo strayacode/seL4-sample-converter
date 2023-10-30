@@ -20,6 +20,11 @@ impl fmt::Display for FileAttribute {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "FileAttribute:")?;
         writeln!(f, " EventAttribute:")?;
+        writeln!(f, "  event_type: {:?}", self.attr.event_type)?;
+        writeln!(f, "  size: {}", self.attr.size)?;
+        writeln!(f, "  sample_period_or_freq: {}", self.attr.sample_period_or_freq)?;
+        writeln!(f, "  sample_type: {:?}", self.attr.sample_type)?;
+        writeln!(f, "  attr_flags: {:?}", self.attr.attr_flags)?;
         writeln!(f, " ids: {}", self.ids)?;
         Ok(())
     }

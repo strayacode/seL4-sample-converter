@@ -8,8 +8,8 @@ pub struct Sel4Sample {
     // instruction pointer
     pub ip: u64,
 
-    // process id (in our case id of the process domain)
-    pub pid: u32,
+    // protection domain id
+    pub pd: u32,
 
     // timestamp of when the sample occured
     pub timestamp: u64,

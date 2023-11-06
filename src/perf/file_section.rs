@@ -1,9 +1,7 @@
 use std::fmt;
 
-use bytemuck::{Pod, Zeroable};
-
 #[repr(C)]
-#[derive(Default, Clone, Copy, Pod, Zeroable, Debug)]
+#[derive(Default, Clone, Copy, Debug)]
 pub struct FileSection {
     // an offset into the file for where this section starts
     pub offset: u64,
